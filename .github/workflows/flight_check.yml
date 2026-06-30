@@ -1,0 +1,31 @@
+name: Daily Flight Price Check
+
+on:
+  schedule:
+    # Runs every day at 5:00 PM India time.
+    # (Equivalent to 11:30 UTC — used as a fallback comment in case the
+    # timezone field below isn't honored by your account/runner.)
+    - cron: '0 17 * * *'
+      timezone: "Asia/Kolkata"
+  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab to test
+
+jobs:
+  check-flight:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run flight tracker
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python flight_tracker.py
